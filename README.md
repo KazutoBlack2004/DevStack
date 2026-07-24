@@ -37,38 +37,4 @@ Puedes personalizar el comportamiento en tu `settings.json` o desde las preferen
 
 *   `devstack.openInSimpleBrowser`: Si está en `true` (por defecto), los enlaces se abrirán en el navegador simple integrado de VS Code en una pestaña lateral. Si se desactiva, se abrirán en tu navegador externo del sistema.
 
----
 
-## 📦 Publicación e Instalación Manual
-
-### Cómo instalar localmente (.vsix)
-
-Si deseas empaquetar la extensión para ti o tus amigos sin subirla a la tienda:
-1. Instala el gestor de extensiones de VS Code:
-   ```bash
-   npm install -g @vscode/vsce
-   ```
-2. Empaqueta el proyecto en la raíz:
-   ```bash
-   vsce package
-   ```
-3. Se generará un archivo `devstack-0.1.0.vsix`. Instálalo en VS Code abriendo la pestaña de extensiones, haciendo clic en el menú `...` (arriba a la derecha) y seleccionando **Instalar desde VSIX...**
-
-### Cómo publicar en la tienda oficial (VS Code Marketplace)
-
-1. Crea una cuenta de desarrollador en [Azure DevOps Portal](https://aka.ms/devops) y obtén un Personal Access Token (PAT) con accesos de Marketplace.
-2. Crea un publicador en [Marketplace Publisher Management](https://marketplace.visualstudio.com/manage).
-3. Inicia sesión en tu terminal:
-   ```bash
-   vsce login <nombre-de-tu-publicador>
-   ```
-4. Sube la extensión a la tienda:
-   ```bash
-   vsce publish
-   ```
-
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
