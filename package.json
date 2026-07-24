@@ -1,0 +1,157 @@
+{
+  "name": "devstack",
+  "displayName": "DevStack",
+  "description": "Developer Resource & Docs Manager - Organiza y busca enlaces/documentación dentro de tu workspace.",
+  "version": "0.1.0",
+  "publisher": "chrys",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "devstack-explorer",
+          "title": "DevStack",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "devstack-explorer": [
+        {
+          "id": "devstackView",
+          "name": "DevStack Explorer",
+          "type": "tree"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "devstack.refresh",
+        "title": "DevStack: Actualizar Vista",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "devstack.addFolder",
+        "title": "DevStack: Crear Carpeta",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "devstack.addLink",
+        "title": "DevStack: Agregar Enlace",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "devstack.editItem",
+        "title": "DevStack: Editar Elemento",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "devstack.deleteItem",
+        "title": "DevStack: Eliminar Elemento",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "devstack.copyUrl",
+        "title": "DevStack: Copiar URL",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "devstack.search",
+        "title": "DevStack: Buscar Recursos",
+        "icon": "$(search)"
+      },
+      {
+        "command": "devstack.openLink",
+        "title": "DevStack: Abrir Enlace"
+      },
+      {
+        "command": "devstack.githubSync",
+        "title": "DevStack: Sincronizar con GitHub",
+        "icon": "$(cloud-upload)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "devstack.githubSync",
+          "when": "view == devstackView",
+          "group": "navigation@0"
+        },
+        {
+          "command": "devstack.search",
+          "when": "view == devstackView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "devstack.addFolder",
+          "when": "view == devstackView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "devstack.addLink",
+          "when": "view == devstackView",
+          "group": "navigation@3"
+        },
+        {
+          "command": "devstack.refresh",
+          "when": "view == devstackView",
+          "group": "navigation@4"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "devstack.addFolder",
+          "when": "view == devstackView && viewItem == folder",
+          "group": "1_modification@1"
+        },
+        {
+          "command": "devstack.addLink",
+          "when": "view == devstackView && viewItem == folder",
+          "group": "1_modification@2"
+        },
+        {
+          "command": "devstack.editItem",
+          "when": "view == devstackView && (viewItem == folder || viewItem == link)",
+          "group": "1_modification@3"
+        },
+        {
+          "command": "devstack.deleteItem",
+          "when": "view == devstackView && (viewItem == folder || viewItem == link)",
+          "group": "1_modification@4"
+        },
+        {
+          "command": "devstack.copyUrl",
+          "when": "view == devstackView && viewItem == link",
+          "group": "2_actions@1"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "DevStack",
+      "properties": {
+        "devstack.openInSimpleBrowser": {
+          "type": "boolean",
+          "default": true,
+          "description": "Si se activa, los enlaces se abrirán en el navegador simple integrado de VS Code. De lo contrario, se abrirán en el navegador predeterminado del sistema."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18",
+    "@types/vscode": "^1.75.0",
+    "typescript": "^5.0.2"
+  }
+}
