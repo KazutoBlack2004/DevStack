@@ -3,7 +3,7 @@
   "displayName": "DevStack",
   "description": "Developer Resource & Docs Manager - Organiza y busca enlaces/documentación dentro de tu workspace.",
   "version": "0.1.0",
-  "publisher": "chrys",
+  "publisher": "KazutoBlack",
   "engines": {
     "vscode": "^1.75.0"
   },
