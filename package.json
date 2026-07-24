@@ -4,6 +4,11 @@
   "description": "Developer Resource & Docs Manager - Organiza y busca enlaces/documentación dentro de tu workspace.",
   "version": "0.1.0",
   "publisher": "KazutoBlack",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KazutoBlack2004/DevStack.git"
+  },
+  "license": "MIT",
   "engines": {
     "vscode": "^1.75.0"
   },
