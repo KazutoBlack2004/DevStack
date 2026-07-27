@@ -2,7 +2,7 @@
   "name": "devstack-resources",
   "displayName": "DevStack - Developer Resource & Docs Manager",
   "description": "Developer Resource & Docs Manager - Organiza y busca enlaces/documentación dentro de tu workspace.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "KazutoBlack",
   "repository": {
     "type": "git",
