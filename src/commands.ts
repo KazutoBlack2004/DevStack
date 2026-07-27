@@ -1,7 +1,82 @@
 import * as vscode from 'vscode';
+import * as http from 'http';
+import * as https from 'https';
 import { Resource, FolderResource, LinkResource } from './types';
 import { StorageManager, generateId } from './storage';
 import { DevStackTreeDataProvider, ResourceTreeItem } from './treeDataProvider';
+
+/**
+ * Comprueba de forma asíncrona mediante una petición HEAD si un sitio web
+ * restringe la carga dentro de iframes (X-Frame-Options o CSP frame-ancestors).
+ */
+function checkFrameHeaders(urlStr: string, redirectsRemaining = 3): Promise<boolean> {
+  return new Promise((resolve) => {
+    let urlObj: URL;
+    try {
+      urlObj = new URL(urlStr);
+    } catch (_) {
+      resolve(true); // Si falla el parseo, asumimos que se puede e intentamos abrir
+      return;
+    }
+
+    const client = urlObj.protocol === 'https:' ? https : http;
+    const req = client.request(
+      urlStr,
+      {
+        method: 'HEAD',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        },
+        timeout: 1000 // Máximo 1 segundo para no demorar la respuesta
+      },
+      (res) => {
+        // Manejar redirecciones
+        if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location && redirectsRemaining > 0) {
+          let redirectUrl = res.headers.location;
+          if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
+            redirectUrl = new URL(redirectUrl, urlObj.href).href;
+          }
+          checkFrameHeaders(redirectUrl, redirectsRemaining - 1).then(resolve);
+          return;
+        }
+
+        const xFrameOptions = res.headers['x-frame-options'];
+        const csp = res.headers['content-security-policy'];
+        
+        if (xFrameOptions) {
+          const val = (Array.isArray(xFrameOptions) ? xFrameOptions[0] : xFrameOptions).toLowerCase();
+          if (val === 'deny' || val === 'sameorigin') {
+            resolve(false); // Bloqueado en iframe
+            return;
+          }
+        }
+        
+        if (csp) {
+          const val = (Array.isArray(csp) ? csp[0] : csp).toLowerCase();
+          if (val.includes('frame-ancestors')) {
+            if (!val.includes("frame-ancestors *")) {
+              resolve(false); // Bloqueado/Restringido en iframe
+              return;
+            }
+          }
+        }
+
+        resolve(true); // Permitido en iframe
+      }
+    );
+
+    req.on('error', () => {
+      resolve(true); // Fallback: si falla, abrimos en Simple Browser y que falle ahí
+    });
+
+    req.on('timeout', () => {
+      req.destroy();
+      resolve(true); // Fallback en timeout
+    });
+
+    req.end();
+  });
+}
 
 /**
  * Registra todos los comandos de DevStack en la extensión.
@@ -20,6 +95,16 @@ export function registerCommands(
       const openInSimpleBrowser = vscode.workspace.getConfiguration('devstack').get<boolean>('openInSimpleBrowser', true);
       
       if (openInSimpleBrowser) {
+        // Comprobar si el sitio bloquea iframes en segundo plano con timeout
+        const canFrame = await checkFrameHeaders(url);
+        
+        if (!canFrame) {
+          // Redirigir al navegador externo de forma automática
+          const uri = vscode.Uri.parse(url);
+          await vscode.env.openExternal(uri);
+          return;
+        }
+
         try {
           await vscode.commands.executeCommand('simpleBrowser.show', url);
         } catch (err) {
@@ -38,6 +123,48 @@ export function registerCommands(
   context.subscriptions.push(
     vscode.commands.registerCommand('devstack.refresh', () => {
       treeDataProvider.refresh();
+    })
+  );
+
+  // 2.1 Abrir Configuración JSON
+  context.subscriptions.push(
+    vscode.commands.registerCommand('devstack.openConfig', async () => {
+      try {
+        const filePath = StorageManager.getFilePath();
+        const uri = vscode.Uri.file(filePath);
+        
+        // Carga por defecto si no existe para crear el archivo
+        StorageManager.load();
+
+        const document = await vscode.workspace.openTextDocument(uri);
+        await vscode.window.showTextDocument(document, { preview: false });
+      } catch (err: any) {
+        vscode.window.showErrorMessage(`No se pudo abrir el archivo de configuración: ${err.message || err}`);
+      }
+    })
+  );
+
+  // 2.2 Abrir en Navegador Externo
+  context.subscriptions.push(
+    vscode.commands.registerCommand('devstack.openLinkExternal', async (selectedItem?: ResourceTreeItem | string) => {
+      let url: string | undefined;
+      if (typeof selectedItem === 'string') {
+        url = selectedItem;
+      } else if (selectedItem && selectedItem.resource && selectedItem.resource.type === 'link') {
+        url = selectedItem.resource.url;
+      }
+
+      if (!url) {
+        vscode.window.showErrorMessage('No hay un enlace válido para abrir.');
+        return;
+      }
+
+      try {
+        const uri = vscode.Uri.parse(url);
+        await vscode.env.openExternal(uri);
+      } catch (err: any) {
+        vscode.window.showErrorMessage(`No se pudo abrir el enlace: ${err.message || err}`);
+      }
     })
   );
 

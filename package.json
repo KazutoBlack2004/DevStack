@@ -80,6 +80,16 @@
         "command": "devstack.githubSync",
         "title": "DevStack: Sincronizar con GitHub",
         "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "devstack.openConfig",
+        "title": "DevStack: Abrir Archivo de Configuración",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "devstack.openLinkExternal",
+        "title": "DevStack: Abrir en Navegador Externo",
+        "icon": "$(link-external)"
       }
     ],
     "menus": {
@@ -105,9 +115,14 @@
           "group": "navigation@3"
         },
         {
-          "command": "devstack.refresh",
+          "command": "devstack.openConfig",
           "when": "view == devstackView",
           "group": "navigation@4"
+        },
+        {
+          "command": "devstack.refresh",
+          "when": "view == devstackView",
+          "group": "navigation@5"
         }
       ],
       "view/item/context": [
@@ -135,6 +150,16 @@
           "command": "devstack.copyUrl",
           "when": "view == devstackView && viewItem == link",
           "group": "2_actions@1"
+        },
+        {
+          "command": "devstack.openLinkExternal",
+          "when": "view == devstackView && viewItem == link",
+          "group": "inline"
+        },
+        {
+          "command": "devstack.openLinkExternal",
+          "when": "view == devstackView && viewItem == link",
+          "group": "2_actions@2"
         }
       ]
     },
